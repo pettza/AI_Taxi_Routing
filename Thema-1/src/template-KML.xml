@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+    <Document>
+        <name>Taxi Routes</name>
+        <Style id="green">
+            <LineStyle>
+                <color>ff009900</color>
+                <width>4</width>
+            </LineStyle>
+        </Style>
+        <Style id="red">
+            <LineStyle>
+                <color>ff0000ff</color>
+                <width>4</width>
+            </LineStyle>
+        </Style>
+        <Placemark>
+            <name>Taxi 1</name>
+            <styleUrl>#green</styleUrl>
+            <LineString>
+                <altitudeMode>relative</altitudeMode>
+                <coordinates>
+                    22.735289,38.006913,0
+                    22.783516,37.931722,0
+                </coordinates>
+            </LineString>
+        </Placemark>
+        <Placemark>
+            <name>Taxi 2</name>
+            <styleUrl>#red</styleUrl>
+            <LineString>
+                <altitudeMode>relative</altitudeMode>
+                <coordinates>
+                    22.783516,37.931745,0
+                </coordinates>
+            </LineString>
+        </Placemark>
+
+    </Document>
+</kml>
