@@ -47,4 +47,10 @@ public class AStarNode extends Node implements Comparable<AStarNode>
     {
         return previousNodes;
     }
+
+    public void copy(AStarNode n)
+    {
+        pathLength = n.getPathLength();
+        previousNodes = n.getPreviousNodes();
+    }
 }

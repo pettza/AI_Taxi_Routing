@@ -35,8 +35,20 @@ public class Node
         return id;
     }
 
-    public boolean equals(final Node n)
+    @Override
+    public boolean equals(Object obj)
     {
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (!Node.class.isAssignableFrom(obj.getClass()))
+        {
+            return false;
+        }
+
+        final Node n = (Node) obj;
         return id == n.id;
     }
 

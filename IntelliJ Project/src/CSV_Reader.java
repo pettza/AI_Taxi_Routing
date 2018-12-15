@@ -41,6 +41,34 @@ public class CSV_Reader {
         }
     }
 
+    public class ParsedLine
+    {
+        public double x, y;
+        public long id;
+
+        public ParsedLine(String[] fields)
+        {
+            try {
+                x = Double.parseDouble(fields[0]);
+                y = Double.parseDouble(fields[1]);
+                id = Long.parseLong(fields[2]);
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public ParsedLine readAndParseLine()
+    {
+        String[] fields = readLine();
+        if (fields == null)
+        {
+            return  null;
+        }
+
+        return new ParsedLine(fields);
+    }
+
     public void closeFile()
     {
         try {

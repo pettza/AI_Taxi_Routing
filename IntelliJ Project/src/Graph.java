@@ -16,50 +16,48 @@ public class Graph
         Node prev_node = null;
         LinkedList<Node> prev_neighbors = null;
         long prev_street_id = -1;
-        String[] fields;
-        while((fields = reader.readLine()) != null)
+        CSV_Reader.ParsedLine fields;
+        while((fields = reader.readAndParseLine()) != null)
         {
-            try {
-                double x = Double.parseDouble(fields[0]);
-                double y = Double.parseDouble(fields[1]);
-                long street_id = Long.parseLong(fields[2]);
-                Node node = new Node(x, y, id);
 
-                LinkedList<Node> neighbors = new LinkedList<>();
+            double x = fields.x;
+            double y = fields.y;
+            long street_id = fields.id;
+            Node node = new Node(x, y, id);
 
-                if (street_id == prev_street_id)
-                {
-                    neighbors.add(prev_node);
-                    prev_neighbors.add(node);
-                }
+            LinkedList<Node> neighbors = new LinkedList<>();
 
-                boolean found = false;
-                for (Node key : nodes.keySet())
-                {
-                    if(key.GetX() == node.GetX() && key.GetY() == node.GetY())
-                    {
-                        LinkedList<Node> value = nodes.get(key);
-                        value.addAll(neighbors);
-                        prev_node = key;
-                        prev_neighbors = value;
-                        found = true;
-                        break;
-                    }
-                }
-
-                if(!found)
-                {
-                    nodes.put(node, neighbors);
-                    prev_neighbors = neighbors;
-                    prev_node = node;
-                    id++;
-                }
-
-                prev_street_id = street_id;
-
-            } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
+            if (street_id == prev_street_id)
+            {
+                neighbors.add(prev_node);
+                prev_neighbors.add(node);
             }
+
+            boolean found = false;
+            for (Node key : nodes.keySet())
+            {
+                if(key.GetX() == node.GetX() && key.GetY() == node.GetY())
+                {
+                    LinkedList<Node> value = nodes.get(key);
+                    value.addAll(neighbors);
+                    prev_node = key;
+                    prev_neighbors = value;
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found)
+            {
+                nodes.put(node, neighbors);
+                prev_neighbors = neighbors;
+                prev_node = node;
+                id++;
+            }
+
+            prev_street_id = street_id;
+
+
         }
     }
 
