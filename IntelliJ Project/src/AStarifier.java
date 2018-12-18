@@ -28,10 +28,9 @@ public class AStarifier
             }
             else
             {
-                if (best == null) System.out.println("POULO!!!");
                 for (Node n: graph.getNeighbors(best))
                 {
-                    AStarNode an = new AStarNode(n, best.getPathLength() + best.distance_from(n), n.distance_from(target), best);
+                    AStarNode an = new AStarNode(n, best.getPathLength() + best.distanceFrom(n), n.distanceFrom(target), best);
                     if(closedSet.contains(an))
                     {
                         closedSet.update(an);
@@ -43,7 +42,7 @@ public class AStarifier
                 }
             }
 
-            if (bestFound == true)
+            if (bestFound)
             {
                 if (ret.getPathLength() < best.getPathLength()) break;
             }
@@ -59,9 +58,9 @@ public class AStarifier
 
         for (Node n : startNodes)
         {
-            AStarNode an = new AStarNode(n, 0.0, n.distance_from(target), new LinkedList<>());
+            AStarNode an = new AStarNode(n, 0.0, n.distanceFrom(target), new LinkedList<>());
             Node nearest = graph.findNearest(an);
-            AStarNode aNearest = new AStarNode(nearest, an.distance_from(nearest), nearest.distance_from(target), an);
+            AStarNode aNearest = new AStarNode(nearest, an.distanceFrom(nearest), nearest.distanceFrom(target), an);
             openSet.update(aNearest);
         }
     }

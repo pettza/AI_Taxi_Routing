@@ -9,14 +9,14 @@ public class Graph
 
     public Graph(String filename)
     {
-        CSV_Reader reader = new CSV_Reader(filename);
+        CSVReader reader = new CSVReader(filename);
 
         nodes = new Hashtable<>();
         long id = 0;
         Node prev_node = null;
         LinkedList<Node> prev_neighbors = null;
         long prev_street_id = -1;
-        CSV_Reader.ParsedLine fields;
+        CSVReader.ParsedLine fields;
         while((fields = reader.readAndParseLine()) != null)
         {
 
@@ -36,7 +36,7 @@ public class Graph
             boolean found = false;
             for (Node key : nodes.keySet())
             {
-                if(key.GetX() == node.GetX() && key.GetY() == node.GetY())
+                if(key.getX() == node.getX() && key.getY() == node.getY())
                 {
                     LinkedList<Node> value = nodes.get(key);
                     value.addAll(neighbors);
@@ -72,7 +72,7 @@ public class Graph
         double bestDist = Double.POSITIVE_INFINITY;
         for (Node key : nodes.keySet())
         {
-            double dist = node.distance_from(key);
+            double dist = node.distanceFrom(key);
             if (dist < bestDist)
             {
                 best = key;

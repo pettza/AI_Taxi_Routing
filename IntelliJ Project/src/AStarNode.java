@@ -15,7 +15,8 @@ public class AStarNode extends Node implements Comparable<AStarNode>
         previousNodes.add(previous);
     }
 
-    public int compareTo(AStarNode n)
+    @Override
+    public int compareTo(final AStarNode n)
     {
         return Double.compare(F(), n.F());
     }
@@ -43,12 +44,12 @@ public class AStarNode extends Node implements Comparable<AStarNode>
         previousNodes.addAll(n);
     }
 
-    public List<AStarNode> getPreviousNodes()
+    public final List<AStarNode> getPreviousNodes()
     {
         return previousNodes;
     }
 
-    public void copy(AStarNode n)
+    public void copy(final AStarNode n)
     {
         pathLength = n.getPathLength();
         previousNodes = n.getPreviousNodes();

@@ -2,11 +2,11 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class CSV_Writer
+public class CSVWriter
 {
     private BufferedWriter bw;
 
-    public CSV_Writer(String filename)
+    public CSVWriter(String filename)
     {
         try {
             bw = new BufferedWriter(new FileWriter(filename));

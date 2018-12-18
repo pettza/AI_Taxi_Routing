@@ -12,9 +12,9 @@ public class Main
         List<Node> taxis = readTaxis("Data\\taxis.csv");
         Graph graph = new Graph("Data\\nodes.csv");
 
-        CSV_Reader reader = new CSV_Reader("Data\\client.csv");
+        CSVReader reader = new CSVReader("Data\\client.csv");
 
-        CSV_Reader.ParsedLine fields = reader.readAndParseLine();
+        CSVReader.ParsedLine fields = reader.readAndParseLine();
         Node target = new Node(fields.x, fields.y, 0);
         reader.closeFile();
 
@@ -26,9 +26,9 @@ public class Main
 
     private static void writeKML(AStarNode node, String filename)
     {
-        CSV_Writer writer = new CSV_Writer(filename);
+        CSVWriter writer = new CSVWriter(filename);
         do {
-            writer.writeln(node.GetX(), node.GetY());
+            writer.writeln(node.getX(), node.getY());
             node = node.getPreviousNodes().get(0);
         } while (!node.getPreviousNodes().isEmpty());
 
@@ -38,8 +38,8 @@ public class Main
 
     private static List<Node> readTaxis(String filename)
     {
-        CSV_Reader reader = new CSV_Reader(filename);
-        CSV_Reader.ParsedLine fields;
+        CSVReader reader = new CSVReader(filename);
+        CSVReader.ParsedLine fields;
         LinkedList<Node> taxis = new LinkedList<>();
         while((fields = reader.readAndParseLine()) != null)
         {
