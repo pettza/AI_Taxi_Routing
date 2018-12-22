@@ -13,30 +13,30 @@ public class Node
         id = id_v;
     }
 
-    public Node(Node n)
+    public Node(final Node n)
     {
         x = n.x;
         y = n.y;
         id = n.id;
     }
 
-    public double GetX()
+    public double getX()
     {
         return x;
     }
 
-    public double GetY()
+    public double getY()
     {
         return y;
     }
 
-    public long GetId()
+    public long getId()
     {
         return id;
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(final Object obj)
     {
         if (obj == null)
         {
@@ -52,13 +52,14 @@ public class Node
         return id == n.id;
     }
 
-    public double distance_from(final Node n)
+    public double distanceFrom(final Node n)
     {
         double dx = x - n.x;
         double dy = y - n.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    @Override
     public int hashCode()
     {
         return (int) id;

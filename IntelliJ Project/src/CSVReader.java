@@ -3,12 +3,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class CSV_Reader {
+public class CSVReader {
 
     private BufferedReader br;
 
 
-    public CSV_Reader(String filename)
+    public CSVReader(String filename)
     {
 
 

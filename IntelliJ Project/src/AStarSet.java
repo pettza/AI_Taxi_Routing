@@ -50,7 +50,7 @@ public class AStarSet
         set.clear();
     }
 
-    public boolean contains(AStarNode n)
+    public boolean contains(final AStarNode n)
     {
         return  map.containsKey(n);
     }
@@ -71,7 +71,7 @@ public class AStarSet
         }
     }
 
-    public  boolean isEmpty()
+    public boolean isEmpty()
     {
         return map.isEmpty();
     }
