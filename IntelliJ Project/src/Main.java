@@ -21,7 +21,7 @@ public class Main
         AStarifier solver = new AStarifier();
 
         AStarNode n = solver.AStarify(graph, taxis, target);
-        writeKML(n, "result-KML.xml");
+        writeKML(n, "result-KML.kml");
     }
 
 
@@ -59,16 +59,17 @@ public class Main
         {
             try {
                 Random rnd = new Random();
+                String color = String.format("ff%02x%02x%02x", rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
 
-                writer.write("<Style id=\"" + "ID" + "\">\n" +
+                writer.write("<Style id=\"" + color + "\">\n" +
                         "            <LineStyle>\n" +
-                        "                <color>" + String.format("ff%02x%02x%02x", rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)) + "</color>\n" +
-                        "                <width>8</width>\n" +
+                        "                <color>" + color + "</color>\n" +
+                        "                <width>4</width>\n" +
                         "            </LineStyle>\n" +
                         "        </Style>\n" +
                         "        <Placemark>\n" +
                         "            <name>Taxi " + node.getId() + "</name>\n" +
-                        "            <styleUrl>#" + "ID" + "</styleUrl>\n" +
+                        "            <styleUrl>#" + color + "</styleUrl>\n" +
                         "            <LineString>\n" +
                         "                <altitudeMode>relative</altitudeMode>\n" +
                         "                <coordinates>\n");
