@@ -1,8 +1,11 @@
 import java.util.*;
 
+//Class to be used for the Open and Closed sets of the A* algorithm
 public class AStarSet
 {
+    //Assisting structure for efficient search
     private Map<Node, AStarNode> map;
+    //The priority queue where nodes are sorted by F
     private SortedSet<AStarNode> set;
 
     public AStarSet()
@@ -11,37 +14,38 @@ public class AStarSet
         set = new TreeSet<>();
     }
 
+    //Update info about AStarNode n (insert if it doesn't exist) and return the updated node
     public AStarNode update(AStarNode n)
     {
+        //If n is not already in the set, add it
         if(!map.containsKey(n))
         {
             map.put(n, n);
             set.add(n);
-            return n;
+            return n; //return newly added node
         }
-        else
+
+        //If it is, get the previous instance
+        AStarNode previousInstance = map.get(n);
+
+        //If the length of the path arriving at n in this instance is the same as before
+        if (previousInstance.getPathLength() == n.getPathLength())
         {
-            AStarNode previousInstance = map.get(n);
-            if (previousInstance.getPathLength() == n.getPathLength())
-            {
-                previousInstance.addPrevious(n.getPreviousNodes());
-                return previousInstance;
-            }
-            else if (previousInstance.getPathLength() > n.getPathLength())
-            {
-                map.replace(n, n);
-                set.remove(n);
-                set.add(n);
-                return n;
-            }
-
-            return previousInstance;
+            //The alternative paths leading to n are added to the list
+            previousInstance.addPrevious(n.getPreviousNodes());
+            return previousInstance; //return reference to the updated instance of the node
         }
-    }
+        //if the currently found path is shorter
+        else if (previousInstance.getPathLength() > n.getPathLength())
+        {
+            //replace the previous instance with the current one
+            map.replace(previousInstance, n);
+            set.remove(previousInstance);
+            set.add(n);
+            return n; //return reference to new instance
+        }
 
-    public AStarNode peekBest()
-    {
-        return set.first();
+        return previousInstance; //if path length of previous instance for some reason in shorter, do nothing and return reference to previous instance
     }
 
     public void clear()
@@ -61,14 +65,6 @@ public class AStarSet
         set.remove(best);
         map.remove(best);
         return best;
-    }
-
-    public void addAll(List<AStarNode> nodeList)
-    {
-        for (AStarNode n: nodeList)
-        {
-            update(n);
-        }
     }
 
     public boolean isEmpty()

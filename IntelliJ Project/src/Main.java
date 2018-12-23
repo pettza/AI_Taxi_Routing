@@ -1,14 +1,14 @@
+import java.awt.*;
+import java.io.*;
+import java.lang.management.BufferPoolMXBean;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 public class Main
 {
     public static void main(String[] args)
     {
-        AStarNode n1 = new AStarNode(new Node(0.0,0.0,0), 0.0, 0.0, new LinkedList<>());
-        AStarNode n2 = new AStarNode(new Node(1.0,1.0,1), 0.0, 0.0, n1);
-        writeKML(n2, "test.txt");
-
         List<Node> taxis = readTaxis("Data\\taxis.csv");
         Graph graph = new Graph("Data\\nodes.csv");
 
@@ -21,20 +21,74 @@ public class Main
         AStarifier solver = new AStarifier();
 
         AStarNode n = solver.AStarify(graph, taxis, target);
-        writeKML(n, "test.txt");
+        writeKML(n, "result-KML.xml");
     }
+
 
     private static void writeKML(AStarNode node, String filename)
     {
-        CSVWriter writer = new CSVWriter(filename);
-        do {
-            writer.writeln(node.getX(), node.getY());
-            node = node.getPreviousNodes().get(0);
-        } while (!node.getPreviousNodes().isEmpty());
+        BufferedWriter writer;
+        try {
+             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
 
-        writer.closeFile();
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<kml xmlns=\"http://earth.google.com/kml/2.1\">\n" +
+                    "    <Document>\n" +
+                    "        <name>Taxi Routes</name>\n");
+
+            printPaths(node, "", writer);
+
+            writer.write("    </Document>\n" +
+                    "</kml>\n");
+
+            writer.close();
+        }catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    //Prints all possible path to node in KML format
+    private static void printPaths(AStarNode node, String str, BufferedWriter writer)
+    {
+        String newStr = node + "\n" + str;
+
+        //If there is no predecessor, print the path
+        if(node.getPreviousNodes().isEmpty())
+        {
+            try {
+                Random rnd = new Random();
+
+                writer.write("<Style id=\"" + "ID" + "\">\n" +
+                        "            <LineStyle>\n" +
+                        "                <color>" + String.format("ff%02x%02x%02x", rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)) + "</color>\n" +
+                        "                <width>8</width>\n" +
+                        "            </LineStyle>\n" +
+                        "        </Style>\n" +
+                        "        <Placemark>\n" +
+                        "            <name>Taxi " + node.getId() + "</name>\n" +
+                        "            <styleUrl>#" + "ID" + "</styleUrl>\n" +
+                        "            <LineString>\n" +
+                        "                <altitudeMode>relative</altitudeMode>\n" +
+                        "                <coordinates>\n");
+                writer.write(newStr);
+                writer.write("                </coordinates>\n" +
+                        "            </LineString>\n" +
+                        "        </Placemark>\n");
+            }   catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            //Add node to the path string and recursively call printPaths for each predecessor
+            for ( AStarNode prev : node.getPreviousNodes())
+            {
+                printPaths(prev, newStr, writer);
+            }
+        }
+    }
 
     private static List<Node> readTaxis(String filename)
     {
@@ -51,4 +105,6 @@ public class Main
 
         return taxis;
     }
+
+
 }

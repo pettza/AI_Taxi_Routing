@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class CSVReader {
 
@@ -10,11 +7,9 @@ public class CSVReader {
 
     public CSVReader(String filename)
     {
-
-
         try {
 
-            br = new BufferedReader(new FileReader(filename));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "ISO-8859-7"));
             br.readLine();
 
         } catch (FileNotFoundException e) {
@@ -25,12 +20,13 @@ public class CSVReader {
         }
     }
 
+    //Reads line and splits it on commas
     public String[] readLine()
     {
         String[] fields = null;
         try {
             String line = br.readLine();
-            if (line != null) {
+            if (line != null || line.isEmpty()) {
                 fields = line.split(",");
             }
         } catch (IOException e) {
@@ -41,19 +37,30 @@ public class CSVReader {
         }
     }
 
+    //Class used in readAndParseLine
     public class ParsedLine
     {
         public double x, y;
         public long id;
+        public String name;
 
         public ParsedLine(String[] fields)
         {
+            int i = 0;
             try {
-                x = Double.parseDouble(fields[0]);
-                y = Double.parseDouble(fields[1]);
-                id = Long.parseLong(fields[2]);
+                x = Double.parseDouble(fields[i]);
+                i++;
+                y = Double.parseDouble(fields[i]);
+                i++;
+                id = Long.parseLong(fields[i]);
+                i++;
+                name = fields[i];
             } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                if(i == 2)
+                {
+                    id = 0;
+                }
+                name = new String();
             }
         }
     }
