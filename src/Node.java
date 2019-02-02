@@ -1,3 +1,5 @@
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.Math;
 
 
@@ -32,7 +34,7 @@ public class Node
         name = name_v;
     }
 
-    public Node(final Node n)
+    public Node(@NotNull final Node n)
     {
         x = n.x;
         y = n.y;

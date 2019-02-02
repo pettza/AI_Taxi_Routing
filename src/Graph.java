@@ -1,103 +1,215 @@
 import java.util.*;
+import java.io.IOException;
+
+import com.ugos.jiprolog.engine.*;
 
 //Graph class providing methods to determine adjacency/proximity of nodes
 public class Graph
 {
-    //Data structure maintaining node adjacency lists
-    private Map<Node, LinkedList<Node>> nodes;
+    private JIPEngine engine;
 
-    public Graph(String filename)
+    private class LineInfo
     {
-        //Define a CSVReader for our file
-        CSVReader reader = new CSVReader(filename);
+        public long id;
+        public int oneway;
+        public boolean lit;
+        public int maxspeed;
+        public boolean toll;
 
-        //Assisting structure for efficient search
-        //The nodes get sorted by X and then by Y
-        TreeMap<Double, TreeMap<Double, Node>> searchTree = new TreeMap<>();
+        LineInfo(long id_v, int oneway_v, boolean lit_v, int maxspeed_v, boolean toll_v)
+        {
+            id = id_v;
+            oneway = oneway_v;
+            lit = lit_v;
+            maxspeed = maxspeed_v;
+            toll = toll_v;
+        }
+    }
 
-        nodes = new Hashtable<>();
+    public Graph(String lineInfoFile, String nodeInfoFile) throws IOException, JIPEvaluationException
+    {
+        engine = new JIPEngine();
+        engine.consultFile("prolog\\LinesNodesRules.pl");
+        readLineInfo(lineInfoFile);
 
-        long id = 0; //running id for nodes
+        //Define a CSVReader for our node file
+        CSVReader reader = new CSVReader(nodeInfoFile);
+
+        JIPTermParser parser = engine.getTermParser();
+        String[] fields;
+
         Node prev_node = null;
-        LinkedList<Node> prev_neighbors = null;
-        long prev_street_id = -1;
-        CSVReader.ParsedLine fields;
+        long prev_line_id = -1;
+        if((fields = reader.readLine()) != null)
+        {
+            prev_node = readNode(fields);
+            prev_line_id = Long.parseLong(fields[3]);
+        }
 
         //While we haven't reached the end of the file
-        while((fields = reader.readAndParseLine()) != null)
+        while(fields != null)
         {
-            double x = fields.x;
-            double y = fields.y;
-            long street_id = fields.id;
-            String name = fields.name;
-            Node node = new Node(x, y, id, name); //Create new Node object from data
+            List<Node> line = new ArrayList<>();
+            line.add(prev_node);
 
-            LinkedList<Node> neighbors = new LinkedList<>();
+            Node node = null;
+            long line_id = -1;
 
-            boolean found = false; //Flag to determine whether the node already exists
-            TreeMap<Double, Node> subTree;
-
-
-            if((subTree = searchTree.get(node.getX())) != null)
+            while((fields = reader.readLine()) != null)
             {
-                Node key;
-                if((key = subTree.get(node.getY())) != null)
-                {
-                    //If the current node is on the same street as the previous one
-                    if (street_id == prev_street_id)
-                    {
-                        //The two nodes are adjacent
-                        neighbors.add(prev_node);
-                        prev_neighbors.add(key);
-                    }
-
-                    //Add neighbors to the existing instance of the node
-                    LinkedList<Node> value = nodes.get(key);
-                    value.addAll(neighbors);
-                    prev_node = key;
-                    prev_neighbors = value;
-                    found = true;
-                }
-                //If the node hasn't been found
-                else
-                {
-                    //Add it to the data structure
-                    subTree.put(node.getY(), node);
-                }
-            }
-            //If no node with the same x coordinate has been found
-            else
-            {
-                //Create new entry for the structure
-                subTree = new TreeMap<>();
-                subTree.put(node.getY(), node);
-                searchTree.put(node.getX(), subTree);
+                node = readNode(fields);
+                line_id = Long.parseLong(fields[2]);
+                if(prev_line_id == line_id) line.add(node);
+                else break;
             }
 
+            addLine(prev_line_id, line);
 
-            if(!found)
+
+            prev_node = node;
+            prev_line_id = line_id;
+        }
+    }
+
+    private Node readNode(String[] fields)
+    {
+        double x = Double.parseDouble(fields[0]);
+        double y = Double.parseDouble(fields[1]);
+        long node_id = Long.parseLong(fields[3]);
+        String name = fields[4];
+
+        return new Node(x, y, node_id, name); //Create new Node object from data
+    }
+
+    private void addLine(long line_id, List<Node> l) throws JIPEvaluationException
+    {
+        LineInfo lineInfo = getLineInfo(line_id);
+        if (lineInfo == null) return;
+
+        Node prevNode = l.get(0);
+        addNode(prevNode);
+
+        JIPTermParser parser = engine.getTermParser();
+        JIPQuery query;
+        for(int i=1; i<l.size(); i++)
+        {
+            Node curNode = l.get(i);
+            addNode(curNode);
+
+            if(lineInfo.oneway > -1)
             {
-                //If the current node is on the same street as the previous one, the nodes are adjacent
-                if (street_id == prev_street_id)
-                {
-                    neighbors.add(prev_node);
-                    prev_neighbors.add(node);
-                }
-
-                //if the node hasn't been found, add it to the graph
-                nodes.put(node, neighbors);
-                prev_neighbors = neighbors;
-                prev_node = node;
-                id++;
+                query = engine.openSynchronousQuery(parser.parseTerm("assert(next(" + prevNode.getId() + "," + curNode.getId() + "," + lineInfo.id + "))."));
+                if(query.nextSolution() == null) throw new JIPEvaluationException("addLine: Assertion Failed!");
+            }
+            if(lineInfo.oneway < 1)
+            {
+                query = engine.openSynchronousQuery(parser.parseTerm("assert(next(" + curNode.getId() + "," + prevNode.getId() + "," + lineInfo.id + "))."));
+                if(query.nextSolution() == null) throw new JIPEvaluationException("addLine: Assertion Failed!");
             }
 
-            prev_street_id = street_id;
+            prevNode = curNode;
+        }
+    }
+
+    private void addNode(Node node) throws JIPEvaluationException
+    {
+        JIPTermParser parser = engine.getTermParser();
+        JIPQuery query;
+
+        query = engine.openSynchronousQuery(parser.parseTerm("assert(node(" + node.getId() + "," + node.getX() + "," + node.getY() + ", \"" + node.getName() + "\"))."));
+        if(query.nextSolution() == null) throw new JIPEvaluationException("addNode: Assertion Failed!");
+    }
+
+    private LineInfo getLineInfo(long line_id)
+    {
+        JIPTermParser parser = engine.getTermParser();
+        JIPQuery query = engine.openSynchronousQuery(parser.parseTerm("line(" + line_id + ", Oneway, Lit, Maxspeed, Toll)."));
+        JIPTerm term = query.nextSolution();
+        if (term == null) return null;
+
+        int oneway = Integer.parseInt(term.getVariablesTable().get("Oneway").toString());
+        boolean lit = Boolean.parseBoolean(term.getVariablesTable().get("Lit").toString());
+        int maxspeed = Integer.parseInt(term.getVariablesTable().get("Maxspeed").toString());
+        boolean toll = Boolean.parseBoolean(term.getVariablesTable().get("Toll").toString());
+
+        return new LineInfo(line_id, oneway, lit, maxspeed, toll);
+    }
+
+    private Node getNode(long node_id) throws JIPEvaluationException
+    {
+        JIPTermParser parser = engine.getTermParser();
+        JIPQuery query = engine.openSynchronousQuery(parser.parseTerm("node(" + node_id + ", X, Y, Name)."));
+        JIPTerm term;
+        if((term = query.nextSolution()) == null) throw new JIPEvaluationException("getNode: failed to find node " + node_id);
+        double x = Double.parseDouble(term.getVariablesTable().get("X").toString());
+        double y = Double.parseDouble(term.getVariablesTable().get("Y").toString());
+        String name = term.getVariablesTable().get("Name").toString();
+
+        return new Node(x, y, node_id, name);
+    }
+
+    private void readLineInfo(String lineInfoFile) throws IOException, JIPEvaluationException
+    {
+        CSVReader reader = new CSVReader(lineInfoFile);
+        String[] fields;
+        JIPTermParser parser = engine.getTermParser();
+        while((fields = reader.readLine()) != null)
+        {
+            for(int i = 0; i < fields.length; i++)
+            {
+                if (fields[i].length() == 0) fields[i] = "empty";
+            }
+            try {
+                JIPQuery query = engine.openSynchronousQuery(parser.parseTerm("addLine(" +
+                        fields[0] + ',' + //id
+                        fields[1] + ',' + //highway
+                        fields[3] + ',' + //oneway
+                        fields[4] + ',' + //lit
+                        fields[6] + ',' + //maxspeed
+                        fields[9] + ',' + //access
+                        fields[17] + //toll
+                        ")."));
+                if (query.nextSolution() == null) throw new JIPEvaluationException("LineInfo: failed to assert fact");
+            } catch (ArrayIndexOutOfBoundsException | JIPSyntaxErrorException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public final List<Node> getNeighbors(Node node)
     {
-        return nodes.get(node);
+        JIPTermParser parser = engine.getTermParser();
+        JIPQuery query = engine.openSynchronousQuery(parser.parseTerm("next(" + node.getId() + ", NeighborId, _LineId)."));
+        JIPTerm term;
+        ArrayList<Node> neighbors = new ArrayList<>();
+        while ((term = query.nextSolution()) != null)
+        {
+            long neighbor_id = Long.parseLong(term.getVariablesTable().get("NeighborId").toString());
+            Node neighbor = getNode(neighbor_id);
+            neighbors.add(neighbor);
+        }
+
+        return neighbors;
+    }
+
+    public double heuristic(Node n1, Node n2)
+    {
+        double dx = n1.getX() - n2.getX();
+        double dy = n1.getY() - n2.getY();
+        return Math.sqrt(dx*dx + dy*dy) / 120.0;
+    }
+
+    public double distance(Node n1, Node n2)
+    {
+        JIPTermParser parser = engine.getTermParser();
+        JIPQuery query = engine.openSynchronousQuery(parser.parseTerm("next(" + n1.getId() + n2.getId() + "LineId)."));
+        JIPTerm term;
+        if((term = query.nextSolution()) == null) throw new JIPEvaluationException("distance: failed to find connection " + n1.getId() + n2.getId());
+        long line_id = Long.parseLong(term.getVariablesTable().get("LineId").toString());
+        LineInfo lineInfo = getLineInfo(line_id);
+
+        //TODO: implement this shit
+        return 0.0;
     }
 
     //The method finds the graph node nearest to the input node
@@ -105,15 +217,25 @@ public class Graph
     {
         Node best = null;
         double bestDist = Double.POSITIVE_INFINITY;
-        for (Node key : nodes.keySet())
-        {
-            double dist = node.distanceFrom(key);
-            if (dist < bestDist)
-            {
-                best = key;
-                bestDist = dist;
-            }
 
+        JIPTermParser parser = engine.getTermParser();
+        JIPQuery query = engine.openSynchronousQuery(parser.parseTerm("node(NodeId, X, Y, Name)."));
+        JIPTerm term;
+
+        while ((term = query.nextSolution()) != null)
+        {   long node_id = Long.parseLong(term.getVariablesTable().get("NodeId").toString());
+            double x = Double.parseDouble(term.getVariablesTable().get("X").toString());
+            double y = Double.parseDouble(term.getVariablesTable().get("Y").toString());
+            String name = term.getVariablesTable().get("Name").toString();
+
+            Node other = new Node(x, y, node_id, name);
+
+            double dist = heuristic(node, other);
+
+            if(dist < bestDist)
+            {
+                best = other;
+            }
         }
 
         return best;
