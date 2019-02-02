@@ -1,6 +1,4 @@
-import java.awt.*;
 import java.io.*;
-import java.lang.management.BufferPoolMXBean;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -9,19 +7,26 @@ public class Main
 {
     public static void main(String[] args)
     {
-        List<Node> taxis = readTaxis("Data\\taxis.csv");
-        Graph graph = new Graph("Data\\nodes.csv");
+        try{
+//            List<Node> taxis = readTaxis("Data\\taxis.csv");
+            Graph graph = new Graph("Data\\lines.csv", "Data\\nodes.csv");
 
-        CSVReader reader = new CSVReader("Data\\client.csv");
+ //           CSVReader reader = new CSVReader("Data\\client.csv");
 
-        CSVReader.ParsedLine fields = reader.readAndParseLine();
-        Node target = new Node(fields.x, fields.y, 0);
-        reader.closeFile();
+            //           String[] fields = reader.readLine();
+ //           Node target = new Node(fields.x, fields.y, 0);
+ //           reader.closeFile();
 
-        AStarifier solver = new AStarifier();
+            List<Node> n = graph.getNeighbors(new Node(0.0,0.0, 838455793, "asxdc"));
+            int bla = 0;
+//            AStarifier solver = new AStarifier();
 
-        AStarNode n = solver.AStarify(graph, taxis, target);
-        writeKML(n, "result-KML.kml");
+//            AStarNode n = solver.AStarify(graph, taxis, target);
+//            writeKML(n, "result-KML.kml");
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
 
@@ -91,21 +96,21 @@ public class Main
         }
     }
 
-    private static List<Node> readTaxis(String filename)
-    {
-        CSVReader reader = new CSVReader(filename);
-        CSVReader.ParsedLine fields;
-        LinkedList<Node> taxis = new LinkedList<>();
-        while((fields = reader.readAndParseLine()) != null)
-        {
-            Node node = new Node(fields.x, fields.y, fields.id);
-            taxis.add(node);
-        }
-
-        reader.closeFile();
-
-        return taxis;
-    }
+//    private static List<Node> readTaxis(String filename)
+//    {
+//        CSVReader reader = new CSVReader(filename);
+//        String[] fields;
+//        LinkedList<Node> taxis = new LinkedList<>();
+//        while((fields = reader.readLine()) != null)
+//        {
+//            Node node = new Node(fields.x, fields.y, fields.id);
+//            taxis.add(node);
+//        }
+//
+//        reader.closeFile();
+//
+//        return taxis;
+//    }
 
 
 }
