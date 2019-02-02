@@ -5,19 +5,10 @@ public class CSVReader {
     private BufferedReader br;
 
 
-    public CSVReader(String filename)
+    public CSVReader(String filename) throws IOException
     {
-        try {
-
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "ISO-8859-7"));
-            br.readLine();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-            closeFile();
-        }
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "ISO-8859-7"));
+        br.readLine();
     }
 
     //Reads line and splits it on commas
@@ -27,7 +18,7 @@ public class CSVReader {
         try {
             String line = br.readLine();
             if (line != null || line.isEmpty()) {
-                fields = line.split(",");
+                fields = (line +  ",empty").split(",");
             }
         } catch (IOException e) {
             br.close();
@@ -37,44 +28,6 @@ public class CSVReader {
         }
     }
 
-    //Class used in readAndParseLine
-    public class ParsedLine
-    {
-        public double x, y;
-        public long id;
-        public String name;
-
-        public ParsedLine(String[] fields)
-        {
-            int i = 0;
-            try {
-                x = Double.parseDouble(fields[i]);
-                i++;
-                y = Double.parseDouble(fields[i]);
-                i++;
-                id = Long.parseLong(fields[i]);
-                i++;
-                name = fields[i];
-            } catch (IndexOutOfBoundsException e) {
-                if(i == 2)
-                {
-                    id = 0;
-                }
-                name = new String();
-            }
-        }
-    }
-
-    public ParsedLine readAndParseLine()
-    {
-        String[] fields = readLine();
-        if (fields == null)
-        {
-            return  null;
-        }
-
-        return new ParsedLine(fields);
-    }
 
     public void closeFile()
     {
