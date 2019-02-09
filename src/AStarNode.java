@@ -1,21 +1,28 @@
-import java.util.List;
-import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.Set;
 
 //Extension of Node class for use in the A* algorithm
 
 public class AStarNode extends Node implements Comparable<AStarNode>
 {
     //List of predecessors in different paths of equal optimal length
-    private List<AStarNode> previousNodes;
+    private Set<AStarNode> previousNodes;
     private double pathLength, heuristic;
 
+    public AStarNode(Node n, double pl_v, double h_v, Set<AStarNode> previous)
+    {
+        super(n);
+        pathLength = pl_v;
+        heuristic = h_v;
+        previousNodes = new HashSet<>(previous);
+    }
 
     public AStarNode(Node n, double pl_v, double h_v, AStarNode previous)
     {
         super(n);
         pathLength = pl_v;
         heuristic = h_v;
-        previousNodes = new LinkedList<>();
+        previousNodes = new HashSet<>();
         previousNodes.add(previous);
     }
 
@@ -28,14 +35,6 @@ public class AStarNode extends Node implements Comparable<AStarNode>
         return Long.compare(getId(), n.getId());
     }
 
-    public AStarNode(Node n, double pl_v, double h_v, List<AStarNode> previous)
-    {
-        super(n);
-        pathLength = pl_v;
-        heuristic = h_v;
-        previousNodes = new LinkedList<>(previous);
-    }
-
     public double F()
     {
         return pathLength + heuristic;
@@ -46,14 +45,13 @@ public class AStarNode extends Node implements Comparable<AStarNode>
         return pathLength;
     }
 
-    public void addPrevious(List<AStarNode> n)
+    public void addPrevious(Set<AStarNode> previous)
     {
-        previousNodes.addAll(n);
+        previousNodes.addAll(previous);
     }
 
-    public final List<AStarNode> getPreviousNodes()
+    public final Set<AStarNode> getPreviousNodes()
     {
         return previousNodes;
     }
-
 }

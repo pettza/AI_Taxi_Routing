@@ -28,8 +28,8 @@ public class AStarSet
         //If it is, get the previous instance
         AStarNode previousInstance = map.get(n);
 
-        //If the length of the path arriving at n in this instance is the same as before
-        if (previousInstance.getPathLength() == n.getPathLength())
+        //If the length of the path arriving at n in this instance is the same or longer than before
+        if (previousInstance.getPathLength() == n.getPathLength() )
         {
             //The alternative paths leading to n are added to the list
             previousInstance.addPrevious(n.getPreviousNodes());

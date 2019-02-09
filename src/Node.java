@@ -1,5 +1,3 @@
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.Math;
 
 
@@ -10,7 +8,6 @@ public class Node
     private double x;
     private double y;
     private long id;
-    private String name;
 
     //For printing purposes
     @Override
@@ -23,23 +20,14 @@ public class Node
         x = x_v;
         y = y_v;
         id = id_v;
-        name = new String();
+
     }
 
-    public Node(double x_v, double y_v, long id_v, String name_v)
-    {
-        x = x_v;
-        y = y_v;
-        id = id_v;
-        name = name_v;
-    }
-
-    public Node(@NotNull final Node n)
+    public Node(final Node n)
     {
         x = n.x;
         y = n.y;
         id = n.id;
-        name = n.name;
     }
 
     public double getX()
@@ -57,8 +45,6 @@ public class Node
         return id;
     }
 
-    public String getName() { return name; }
-
     @Override
     public boolean equals(final Object obj)
     {
@@ -74,14 +60,6 @@ public class Node
 
         final Node n = (Node) obj;
         return id == n.id;
-    }
-
-    //Euclidian distance
-    public double distanceFrom(final Node n)
-    {
-        double dx = x - n.x;
-        double dy = y - n.y;
-        return Math.sqrt(dx * dx + dy * dy);
     }
 
     @Override
